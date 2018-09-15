@@ -75,7 +75,7 @@ public class MainActivity extends Activity {
 
             if(networkInfo != null){
                 //check if active network is Wifi
-                boolean isWifiAvaiable = mComMgr.getNetworkInfo(ConnectivityManager.TYPE_WIFI).isConnected();
+                boolean isWifiAvailable = mComMgr.getNetworkInfo(ConnectivityManager.TYPE_WIFI).isConnected();
 
                 //check if active one is mobile data
                 boolean isGSMAvailable = mComMgr.getNetworkInfo(ConnectivityManager.TYPE_MOBILE).isConnected();
@@ -83,7 +83,7 @@ public class MainActivity extends Activity {
                 //check if bluetooth is connected
                 //boolean isBTAvailable = mComMgr.getNetworkInfo(ConnectivityManager.TYPE_BLUETOOTH).isConnected();
 
-                if(isWifiAvaiable){
+                if(isWifiAvailable){
                     //Display wifi connected as toast
                     Toast.makeText(context, "WiFi is connected", Toast.LENGTH_SHORT).show();
                 } else if(isGSMAvailable){
