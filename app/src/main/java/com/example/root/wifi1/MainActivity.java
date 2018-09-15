@@ -1,8 +1,9 @@
 package com.example.root.wifi1;
 
 import android.app.Activity;
+import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.IntentFilter;
+import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
@@ -21,10 +22,6 @@ public class MainActivity extends Activity {
 
         //store connectivity manager in member variable
         mComMgr = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-
-
-        //IntentFilter filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
-
     }
     @Override
     public void onDestroy(){
@@ -62,6 +59,28 @@ public class MainActivity extends Activity {
             } else{
                 //display toast message that network is not active
                 Toast.makeText(this, "Network is Currently Not Available", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+    /*broadcast receiver which onReceive will be called whenever a network event
+    such as network disconnected or network connected takes place
+    The broadcast receiver is registered in the onCreate with intent action CONNECTIVITY_ACTION*/
+    public class NetworkReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent){
+            //get network info structure
+            NetworkInfo networkInfo = mComMgr.getActiveNetworkInfo();
+            if(networkInfo != null){
+                //check if active network is Wifi
+                boolean isWifiAvailable = mComMgr.getNetworkInfo(ConnectivityManager.TYPE_WIFI).isConnected();
+
+                if(isWifiAvailable){
+                    Toast.makeText(context, "WiFi is connected", Toast.LENGTH_SHORT).show();
+                } else{
+                    //Display network not available as toast
+                    Toast.makeText(context, "Not connected/Not Available", Toast.LENGTH_SHORT).show();
+                }
             }
         }
     }
