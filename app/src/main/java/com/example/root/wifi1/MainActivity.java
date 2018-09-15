@@ -79,6 +79,11 @@ public class MainActivity extends Activity {
         }
     }
 
+    public void onNextButtonClick(View v){
+        Intent second_page = new Intent(MainActivity.this, testHTTP.class);
+        startActivity(second_page);
+    }
+
     /*broadcast receiver which onReceive will be called whenever a network event
     such as network disconnected or network connected takes place
     The broadcast receiver is registered in the onCreate with intent action CONNECTIVITY_ACTION*/
