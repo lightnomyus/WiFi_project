@@ -9,6 +9,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Button;
 import android.widget.Toast;
 
 public class MainActivity extends Activity {
@@ -16,6 +17,8 @@ public class MainActivity extends Activity {
     private ConnectivityManager mComMgr;
 
     public NetworkReceiver mReceiver;
+
+    //private Button SendRequest;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,6 +36,8 @@ public class MainActivity extends Activity {
         //register broadcast with intent action CONNECTIVITY_ACTION
         //broadcast receiver's nnReceive will be called every time a network occurs
         registerReceiver(mReceiver, filter);
+
+        //SendRequest = (Button) findViewById(R.id.send_button);
     }
     @Override
     public void onDestroy(){
@@ -78,6 +83,8 @@ public class MainActivity extends Activity {
             }
         }
     }
+
+
 
 
     /*broadcast receiver which onReceive will be called whenever a network event
