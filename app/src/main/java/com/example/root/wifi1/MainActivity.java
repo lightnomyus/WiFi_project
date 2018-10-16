@@ -8,9 +8,20 @@ import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
+
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
+
+import org.w3c.dom.Text;
 
 public class MainActivity extends Activity {
 
@@ -18,7 +29,11 @@ public class MainActivity extends Activity {
 
     public NetworkReceiver mReceiver;
 
-    //private Button SendRequest;
+    Button get_unique_code;
+
+    TextView print_unique_code;
+
+    String server_url = "http://www.mocky.io/v2/5bc664273200004e000b0329";//insert the url or server address here
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,7 +52,35 @@ public class MainActivity extends Activity {
         //broadcast receiver's nnReceive will be called every time a network occurs
         registerReceiver(mReceiver, filter);
 
-        //SendRequest = (Button) findViewById(R.id.send_button);
+        get_unique_code = findViewById(R.id.get_unique_code_button);
+        print_unique_code = findViewById(R.id.unique_code);
+
+        get_unique_code.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //send request by http
+                final RequestQueue requestQueue = Volley.newRequestQueue(MainActivity.this);
+
+                StringRequest stringRequest = new StringRequest(Request.Method.POST, server_url,
+
+                        new Response.Listener<String>() {
+                            @Override
+                            public void onResponse(String response) {
+
+                                print_unique_code.setText("Your Unique Code is " + response);
+                                requestQueue.stop();
+                            }
+                        }, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        print_unique_code.setText("Error to receive Unique Code");
+                        error.printStackTrace();
+                        requestQueue.stop();
+                    }
+                });
+                requestQueue.add(stringRequest);
+            }
+        });
     }
     @Override
     public void onDestroy(){
@@ -84,12 +127,9 @@ public class MainActivity extends Activity {
         }
     }
 
-
-
-
     /*broadcast receiver which onReceive will be called whenever a network event
-    such as network disconnected or network connected takes place
-    The broadcast receiver is registered in the onCreate with intent action CONNECTIVITY_ACTION*/
+        such as network disconnected or network connected takes place
+        The broadcast receiver is registered in the onCreate with intent action CONNECTIVITY_ACTION*/
     public class NetworkReceiver extends BroadcastReceiver{
 
         @Override
