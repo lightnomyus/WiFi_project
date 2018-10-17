@@ -22,7 +22,7 @@ import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 
 import org.w3c.dom.Text;
-
+//MainActivity class: main class
 public class MainActivity extends Activity {
 
     private ConnectivityManager mComMgr;
