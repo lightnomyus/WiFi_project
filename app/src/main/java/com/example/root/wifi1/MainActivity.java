@@ -1,13 +1,21 @@
 package com.example.root.wifi1;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
+import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -25,8 +33,16 @@ import org.w3c.dom.Text;
 
 public class MainActivity extends Activity {
 
-    private ConnectivityManager mComMgr;
 
+    private LocationManager locationManager;
+    private LocationListener locationListener;
+    private TextView StrLatLong;
+    double latShow;
+    double longShow;
+    String latShowStr;
+    String longShowStr;
+
+    private ConnectivityManager mComMgr;
     public NetworkReceiver mReceiver;
 
     Button get_unique_code;
@@ -40,6 +56,51 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         //setting view content as activity_main.xml
         setContentView(R.layout.activity_main);
+
+        StrLatLong = findViewById(R.id.textView2);
+
+        //location manager
+        locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+        locationListener = new LocationListener() {
+            @Override
+            public void onLocationChanged(Location location) {
+                latShow = location.getLatitude();
+                longShow = location.getLongitude();
+                latShowStr = Double.toString(latShow);
+                longShowStr = Double.toString(longShow);
+                StrLatLong.append("\nLat = " + latShowStr + "\nLong = " + longShowStr);
+            }
+
+            @Override
+            public void onStatusChanged(String provider, int status, Bundle extras) {
+
+            }
+
+            @Override
+            public void onProviderEnabled(String provider) {
+
+            }
+
+            @Override
+            public void onProviderDisabled(String provider) {
+
+            }
+        };
+
+        //if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                // TODO: Consider calling
+                //    ActivityCompat#requestPermissions
+                // here to request the missing permissions, and then overriding
+                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                //                                          int[] grantResults)
+                // to handle the case where the user grants the permission. See the documentation
+                // for ActivityCompat#requestPermissions for more details.
+                return;
+            }
+        //}
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 60000, 0, locationListener);/* update every 60000 miliseconds
+        and if the person has moved 0 meter*/
 
         //store connectivity manager in member variable
         mComMgr = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -82,6 +143,7 @@ public class MainActivity extends Activity {
             }
         });
     }
+
     @Override
     public void onDestroy(){
         super.onDestroy();
