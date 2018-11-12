@@ -1,4 +1,4 @@
-seconConnect overview:
+secondConnect overview:
 
 Using android volley library
 send a simple string request:
