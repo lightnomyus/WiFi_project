@@ -12,6 +12,7 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
@@ -31,8 +32,21 @@ import com.android.volley.toolbox.Volley;
 
 import org.w3c.dom.Text;
 
-public class MainActivity extends Activity {
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.net.ServerSocket;
+import java.net.Socket;
 
+public class MainActivity extends Activity {
+    private static Socket s;
+    //private static ServerSocket ss;
+    private static InputStreamReader isr;
+    private static BufferedReader br;
+    private static String ip_server = "192.168.3.186";//
+    private static PrintWriter printWriter;
+    String message = "Hello, WOrld!";
 
     private LocationManager locationManager;
     private LocationListener locationListener;
@@ -52,7 +66,8 @@ public class MainActivity extends Activity {
     String server_url = "http://www.mocky.io/v2/5bc664273200004e000b0329";//insert the url or server address here
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState)
+    {
         super.onCreate(savedInstanceState);
         //setting view content as activity_main.xml
         setContentView(R.layout.activity_main);
@@ -63,12 +78,15 @@ public class MainActivity extends Activity {
         locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
         locationListener = new LocationListener() {
             @Override
-            public void onLocationChanged(Location location) {
+            public void onLocationChanged(Location location)
+            {
                 latShow = location.getLatitude();
                 longShow = location.getLongitude();
                 latShowStr = Double.toString(latShow);
                 longShowStr = Double.toString(longShow);
                 StrLatLong.append("\nLat = " + latShowStr + "\nLong = " + longShowStr);
+
+                sendDataToServer();//send gps lat,long, and heart rate to server via tcp
             }
 
             @Override
@@ -99,7 +117,7 @@ public class MainActivity extends Activity {
                 return;
             }
         //}
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 60000, 0, locationListener);/* update every 60000 miliseconds
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 6000, 0, locationListener);/* update every 60000 miliseconds
         and if the person has moved 0 meter*/
 
         //store connectivity manager in member variable
@@ -145,7 +163,8 @@ public class MainActivity extends Activity {
     }
 
     @Override
-    public void onDestroy(){
+    public void onDestroy()
+    {
         super.onDestroy();
 
         //unregister broadcast receiver during background activity
@@ -154,8 +173,36 @@ public class MainActivity extends Activity {
         }
     }
 
+    public void sendDataToServer()
+    {
+        sendTask st = new sendTask();
+        st.execute();
+        Toast.makeText(getApplicationContext(), "Data sent : " + message, Toast.LENGTH_LONG).show();
+    }
+
+    public class sendTask extends AsyncTask<Void, Void, Void>
+    {
+        @Override
+        protected Void doInBackground(Void... voids)
+        {
+            try
+            {
+                s = new Socket(ip_server,5000);//connect to socket port at port 5000
+                printWriter = new PrintWriter(s.getOutputStream());
+                printWriter.write(message);
+                printWriter.flush();
+                printWriter.close();
+                s.close();
+            } catch (IOException e)
+            {
+                e.printStackTrace();
+            }
+            return null;
+        }
+    }
     //Network status button event handler
-    public void onShowNetworkStatus(View v) {
+    public void onShowNetworkStatus(View v)
+    {
         //make sure connection manager instance is not null variable
         if(mComMgr != null){
             //active network info struct
@@ -192,8 +239,8 @@ public class MainActivity extends Activity {
     /*broadcast receiver which onReceive will be called whenever a network event
         such as network disconnected or network connected takes place
         The broadcast receiver is registered in the onCreate with intent action CONNECTIVITY_ACTION*/
-    public class NetworkReceiver extends BroadcastReceiver{
-
+    public class NetworkReceiver extends BroadcastReceiver
+    {
         @Override
         public void onReceive(Context context, Intent intent){
 
