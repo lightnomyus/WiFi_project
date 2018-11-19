@@ -35,6 +35,7 @@ import org.w3c.dom.Text;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -46,13 +47,14 @@ public class MainActivity extends Activity {
     private static BufferedReader br;
     private static String ip_server = "192.168.3.186";//
     private static PrintWriter printWriter;
+    private static OutputStream outputStream;
     String message = "Hello, WOrld!";
 
     private LocationManager locationManager;
     private LocationListener locationListener;
     private TextView StrLatLong;
-    double latShow;
-    double longShow;
+    double latShow = -6.8880713;
+    double longShow = 107.6117433;
     String latShowStr;
     String longShowStr;
 
@@ -86,7 +88,7 @@ public class MainActivity extends Activity {
                 longShowStr = Double.toString(longShow);
                 StrLatLong.append("\nLat = " + latShowStr + "\nLong = " + longShowStr);
 
-                sendDataToServer();//send gps lat,long, and heart rate to server via tcp
+                //sendDataToServer();//send gps lat,long, and heart rate to server via tcp
             }
 
             @Override
@@ -117,7 +119,7 @@ public class MainActivity extends Activity {
                 return;
             }
         //}
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 6000, 0, locationListener);/* update every 60000 miliseconds
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 60000, 0, locationListener);/* update every 60000 miliseconds
         and if the person has moved 0 meter*/
 
         //store connectivity manager in member variable
@@ -160,6 +162,29 @@ public class MainActivity extends Activity {
                 requestQueue.add(stringRequest);
             }
         });
+
+        //interrupt handling
+        Thread t = new Thread(){
+            @Override
+            public void run(){
+                while( !isInterrupted() ){
+                    try {
+                        Thread.sleep(60000);//tiap 60000millis = 60 sekon = 1 menit
+
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                sendDataToServer();//send data here every 60000 ms
+                            }
+                        });
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        };
+        t.start();//start doing Thread on new activity
+
     }
 
     @Override
@@ -175,12 +200,13 @@ public class MainActivity extends Activity {
 
     public void sendDataToServer()
     {
+        StrLatLong.append("\nLat = " + latShowStr + "\nLong = " + longShowStr);
         sendTask st = new sendTask();
         st.execute();
-        Toast.makeText(getApplicationContext(), "Data sent : " + message, Toast.LENGTH_LONG).show();
+        Toast.makeText(getApplicationContext(), "Data sent : " + latShowStr + "| " + longShowStr, Toast.LENGTH_LONG).show();
     }
 
-    public class sendTask extends AsyncTask<Void, Void, Void>
+    public class sendTask extends AsyncTask<Void, Void, Void>//Section to send data via TCP
     {
         @Override
         protected Void doInBackground(Void... voids)
@@ -189,7 +215,10 @@ public class MainActivity extends Activity {
             {
                 s = new Socket(ip_server,5000);//connect to socket port at port 5000
                 printWriter = new PrintWriter(s.getOutputStream());
-                printWriter.write(message);
+                //printWriter.write(message);
+                printWriter.print(latShow);
+                printWriter.print(longShow);
+                //printWriter.write();
                 printWriter.flush();
                 printWriter.close();
                 s.close();
