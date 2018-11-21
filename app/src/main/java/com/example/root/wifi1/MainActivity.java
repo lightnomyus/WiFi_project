@@ -2,6 +2,8 @@ package com.example.root.wifi1;
 
 import android.Manifest;
 import android.app.Activity;
+import android.bluetooth.BluetoothGattCharacteristic;
+import android.bluetooth.BluetoothGattDescriptor;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -42,7 +44,6 @@ import java.net.Socket;
 
 public class MainActivity extends Activity {
     private static Socket s;
-    //private static ServerSocket ss;
     private static InputStreamReader isr;
     private static BufferedReader br;
     private static String ip_server = "192.168.3.186";//
@@ -109,28 +110,17 @@ public class MainActivity extends Activity {
 
         //if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                // TODO: Consider calling
-                //    ActivityCompat#requestPermissions
-                // here to request the missing permissions, and then overriding
-                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                //                                          int[] grantResults)
-                // to handle the case where the user grants the permission. See the documentation
-                // for ActivityCompat#requestPermissions for more details.
                 return;
             }
         //}
         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 60000, 0, locationListener);/* update every 60000 miliseconds
         and if the person has moved 0 meter*/
 
-        //store connectivity manager in member variable
         mComMgr = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
 
-        //instantiate network events as broadcast receiver
         mReceiver= new NetworkReceiver();
         IntentFilter filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
 
-        //register broadcast with intent action CONNECTIVITY_ACTION
-        //broadcast receiver's nnReceive will be called every time a network occurs
         registerReceiver(mReceiver, filter);
 
         get_unique_code = findViewById(R.id.get_unique_code_button);
@@ -229,6 +219,7 @@ public class MainActivity extends Activity {
             return null;
         }
     }
+
     //Network status button event handler
     public void onShowNetworkStatus(View v)
     {
