@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.location.GpsStatus;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -28,15 +29,24 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
-
-import org.w3c.dom.Text;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationRequest;
+import android.app.Activity;
+import android.os.Bundle;
+import android.widget.Toast;
+import android.util.Log;
 
 public class MainActivity extends Activity {
 
 
     private LocationManager locationManager;
     private LocationListener locationListener;
-    private TextView StrLatLong;
+    private boolean mRequestLocUpdate = false;
+    private LocationRequest mLocRequest;
+    private GoogleApiClient mClient;
+    private Location lasLoc;
+    private TextView StrLatLong, txtCoordinate;
+    private Button btnGetLoc;
     double latShow;
     double longShow;
     String latShowStr;
@@ -57,10 +67,14 @@ public class MainActivity extends Activity {
         //setting view content as activity_main.xml
         setContentView(R.layout.activity_main);
 
-        StrLatLong = findViewById(R.id.textView2);
+        //StrLatLong = findViewById(R.id.textView2);
+
+        txtCoordinate = (TextView) findViewById(R.id.textView2);
+        btnGetLoc = (Button) findViewById(R.id.button2);
 
         //location manager
         locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+
         locationListener = new LocationListener() {
             @Override
             public void onLocationChanged(Location location) {
